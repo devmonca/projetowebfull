@@ -1,12 +1,13 @@
 package com.example.criandoapi.projeto.controller;
 
-import com.example.criandoapi.projeto.DAO.IUsuario;
+import com.example.criandoapi.projeto.repository.IUsuario;
 import com.example.criandoapi.projeto.model.Usuario;
+import com.example.criandoapi.projeto.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -16,29 +17,31 @@ public class UserController {
     @Autowired
     private IUsuario dao;
 
+    private UsuarioService usuarioService;
+    public UserController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
+
     @GetMapping
-    public List<Usuario> listaUsuarios() {
-        return (List<Usuario>) dao.findAll();
-        // quero entender o pq desse casting
+    public ResponseEntity<List<Usuario>> listaUsuarios() {
+        return ResponseEntity.status(200).body(usuarioService.listarUsuario());
     }
 
     @PostMapping
-    public Usuario criarUsuario(@RequestBody Usuario usuario){
-        Usuario usuarioNovo = dao.save(usuario);
-        return usuarioNovo;
+    public ResponseEntity<Usuario> criarUsuario(@RequestBody Usuario usuario){
+        return ResponseEntity.status(201).body(usuarioService.criarUsuario(usuario));
     }
 
     @PutMapping
-    public Usuario editarUsuario(@RequestBody Usuario usuario){
+    public ResponseEntity<Usuario> editarUsuario(@RequestBody Usuario usuario){
         Usuario usuarioEditado = dao.save(usuario);
-        return usuarioEditado;
+        return ResponseEntity.status(201).body(usuarioEditado);
     }
 
     @DeleteMapping("/{id}")
-    public Optional<Usuario> deletarUsuario(@PathVariable Integer id){
-        Optional<Usuario> usuario = dao.findById(id);
+    public ResponseEntity<?> deletarUsuario(@PathVariable Integer id){
         dao.deleteById(id);
-        return usuario;
+        return ResponseEntity.status(204).build();
     }
 
 

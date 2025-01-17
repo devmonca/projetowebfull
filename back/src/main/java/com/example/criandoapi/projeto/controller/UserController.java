@@ -14,9 +14,6 @@ import java.util.List;
 @RequestMapping("/usuarios")
 public class UserController {
 
-    @Autowired
-    private IUsuario dao;
-
     private UsuarioService usuarioService;
     public UserController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
@@ -34,13 +31,13 @@ public class UserController {
 
     @PutMapping
     public ResponseEntity<Usuario> editarUsuario(@RequestBody Usuario usuario){
-        Usuario usuarioEditado = dao.save(usuario);
-        return ResponseEntity.status(201).body(usuarioEditado);
+        Usuario usuarioEditado = usuarioService.editarUsuario(usuario);
+        return ResponseEntity.status(200).body(usuarioService.editarUsuario(usuarioEditado));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarUsuario(@PathVariable Integer id){
-        dao.deleteById(id);
+        usuarioService.deletarUSuario(id);
         return ResponseEntity.status(204).build();
     }
 

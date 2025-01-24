@@ -3,7 +3,7 @@ package com.example.criandoapi.projeto.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name= "usuario")
+@Table(name= "usuarios")
 public class Usuario {
 
     @Id
@@ -21,6 +21,17 @@ public class Usuario {
 
     @Column(name = "email",length = 200, nullable = false)
     private String email;
+
+    @Column(name = "senha",length = 200, nullable = false)
+    private String senha;
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
 
     public Integer getId() {
         return id;

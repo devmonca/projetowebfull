@@ -2,6 +2,8 @@ package com.example.criandoapi.projeto.service;
 
 import com.example.criandoapi.projeto.model.Usuario;
 import com.example.criandoapi.projeto.repository.IUsuario;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,8 +11,10 @@ import java.util.List;
 @Service
 public class UsuarioService {
     private IUsuario repository;
+    private PasswordEncoder passwordEncoder;
 
     public UsuarioService(IUsuario repository) {
+        this.passwordEncoder = new BCryptPasswordEncoder();
         this.repository = repository;
     }
 
@@ -20,13 +24,18 @@ public class UsuarioService {
     }
 
     public Usuario criarUsuario(Usuario usuario){
-        Usuario usuarioNovo = repository.save(usuario);
-        return usuarioNovo;
+        String senhaCodificada = this.passwordEncoder.encode(usuario.getSenha());
+        usuario.setSenha(senhaCodificada); // Codifique a senha antes de salvar
+        return repository.save(usuario);
     }
 
     public Usuario editarUsuario(Usuario usuario){
-        Usuario usuarioAtualizado = repository.save(usuario);
-        return usuarioAtualizado;
+        Usuario usuarioExistente = repository.findById(usuario.getId()).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        if (!usuario.getSenha().equals(usuarioExistente.getSenha())) {
+            String senhaCodificada = this.passwordEncoder.encode(usuario.getSenha());
+            usuario.setSenha(senhaCodificada);
+        }
+        return repository.save(usuario);
     }
 
     public Boolean deletarUSuario(Integer id){
@@ -35,4 +44,13 @@ public class UsuarioService {
     }
 
 
+    public Boolean validarSenha(String email, String senha){
+        Usuario usuario = repository.findByEmail(email);
+
+        if (usuario == null) {
+            return false;
+        }
+
+        return passwordEncoder.matches(senha, usuario.getSenha());
+    }
 }

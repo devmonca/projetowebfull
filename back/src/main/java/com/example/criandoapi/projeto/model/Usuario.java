@@ -1,6 +1,15 @@
 package com.example.criandoapi.projeto.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+@Data
+
+@Getter
+@Setter
 
 @Entity
 @Table(name= "usuarios")
@@ -10,66 +19,25 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank(message = "O nome é obrigatório")
     @Column(name = "nome",length = 200, nullable = false)
     private String nome;
 
+    @NotBlank(message = "O sobrenome é obrigatório")
     @Column(name = "sobrenome",length = 200, nullable = false)
     private String sobrenome;
 
+    @NotNull(message = "A idade é obrigatório")
     @Column(name = "idade", nullable = false)
     private Integer idade;
 
-    @Column(name = "email",length = 200, nullable = false)
+    @Email(message = "Insira um email válido")
+    @Column(name = "email", columnDefinition = "TEXT", nullable = false)
     private String email;
 
+    @NotBlank(message = "A senha é obrigatória")
+    @Size(min = 8, message = "A senha deve ter ao menos 8 caracteres")
     @Column(name = "senha",length = 200, nullable = false)
     private String senha;
 
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getSobrenome() {
-        return sobrenome;
-    }
-
-    public void setSobrenome(String sobrenome) {
-        this.sobrenome = sobrenome;
-    }
-
-    public Integer getIdade() {
-        return idade;
-    }
-
-    public void setIdade(Integer idade) {
-        this.idade = idade;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 }

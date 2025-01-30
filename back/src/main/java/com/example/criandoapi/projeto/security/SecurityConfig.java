@@ -16,15 +16,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/usuarios") // Desativa CSRF apenas para este endpoint
+                        .ignoringRequestMatchers("/usuarios/login")
+                        .ignoringRequestMatchers("/usuarios")
+                        .ignoringRequestMatchers("/usuarios/{id}")
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST,"/usuarios/login").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/usuarios").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors();
 
-        // Adiciona o filtro antes do UsernamePasswordAuthenticationFilter
         http.addFilterBefore(new SecurityFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

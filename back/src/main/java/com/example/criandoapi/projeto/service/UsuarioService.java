@@ -6,6 +6,11 @@ import com.example.criandoapi.projeto.repository.IUsuario;
 import com.example.criandoapi.projeto.security.Token;
 import com.example.criandoapi.projeto.security.TokenUtil;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,8 +19,9 @@ import java.util.List;
 
 @Service
 public class UsuarioService {
-    private IUsuario repository;
-    private PasswordEncoder passwordEncoder;
+    private final IUsuario repository;
+    private final PasswordEncoder passwordEncoder;
+    private final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
 
     public UsuarioService(IUsuario repository) {
         this.passwordEncoder = new BCryptPasswordEncoder();
@@ -23,13 +29,14 @@ public class UsuarioService {
     }
 
     public List<Usuario> listarUsuario(){
-        List<Usuario> lista = repository.findAll();
-        return lista;
+        logger.info("Usuario: "+ getLogado().toUpperCase()+ " listando usuários");
+        return repository.findAll();
     }
 
     public Usuario criarUsuario(Usuario usuario){
         String senhaCodificada = this.passwordEncoder.encode(usuario.getSenha());
         usuario.setSenha(senhaCodificada); // Codifique a senha antes de salvar
+        logger.info("Usuario: "+ getLogado().toUpperCase()+ " criando usuário " + usuario.getNome());
         return repository.save(usuario);
     }
 
@@ -39,33 +46,32 @@ public class UsuarioService {
             String senhaCodificada = this.passwordEncoder.encode(usuario.getSenha());
             usuario.setSenha(senhaCodificada);
         }
+        logger.info("Usuario: "+ getLogado().toUpperCase()+ " editando usuário: "+usuario.getNome());
         return repository.save(usuario);
     }
 
     public Boolean deletarUSuario(Integer id){
         repository.deleteById(id);
+        logger.info("Usuario: "+ getLogado()+ "Excluindo usuário id: " + id);
         return true;
-    }
-
-
-    public Boolean validarSenha(String email, String senha){
-        Usuario usuario = repository.findByEmail(email);
-
-        if (usuario == null) {
-            return false;
-        }
-
-        return passwordEncoder.matches(senha, usuario.getSenha());
     }
 
     public Token gerarToken(@Valid UsuarioDTO usuario) {
         Usuario user = repository.findByNomeOrEmail(usuario.getNome(), usuario.getEmail());
         if(user != null){
-            Boolean valid = passwordEncoder.matches(usuario.getSenha(), user.getSenha());
+            boolean valid = passwordEncoder.matches(usuario.getSenha(), user.getSenha());
             if(valid){
                 return new Token(TokenUtil.createToken(user));
             }
         }
         return null;
+    }
+
+    private String getLogado(){
+        Authentication userLogado = SecurityContextHolder.getContext().getAuthentication();
+        if(!(userLogado instanceof AnonymousAuthenticationToken)){
+            return userLogado.getName();
+        }
+        return "Null";
     }
 }
